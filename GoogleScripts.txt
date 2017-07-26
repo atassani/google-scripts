@@ -1,0 +1,109 @@
+In a Google Form:
+Agile Excellence
+
+function sendForm() {
+  var email = "agilecoaches@odigeo.com";
+  var currentForm = FormApp.getActiveForm();
+  var subject = currentForm.getTitle();
+  var message = currentForm.getDescription() + "\nI've invited you to fill out the form " + currentForm.getTitle() + ". To fill it out, visit: \n"
+    + currentForm.getPublishedUrl();
+  var htmlMessage = "<div style=\"font:inherit;white-space:pre-wrap;white-space:-moz-pre-wrap;word-wrap:break-word;width:99%\" dir=\"ltr\">" + currentForm.getDescription()
+    + "</div><br> I've invited you to fill out the form <b><span dir=\"ltr\">" + currentForm.getTitle() + "</span></b>. To fill it out, visit: <br>"
+    + currentForm.getPublishedUrl();
+  MailApp.sendEmail(email, subject, message, {
+    htmlBody: htmlMessage
+  });
+}
+
+function createTimeDrivenTrigger() {
+  // Schedules for the first of every month
+  ScriptApp.newTrigger("sendForm")
+   .timeBased()
+   .onMonthDay(1)
+   .create();
+}
+
+Health Check
+
+function sendForm() {
+  var recipientSheet = SpreadsheetApp.openById('12ZmwcOgld_2ogH32Tk470h6u2MhLHGt29hFhaSrMCkI').getActiveSheet();
+  var recipientsRange = recipientSheet.getDataRange();
+  var recipientsValues = recipientsRange.getValues();
+  var email = "";
+  var currentForm = FormApp.getActiveForm();
+  var subject = currentForm.getTitle();
+  var message = currentForm.getDescription() + "\nI've invited you to fill out the form " + currentForm.getTitle() + ". To fill it out, visit: \n"
+    + currentForm.getPublishedUrl();
+  var htmlMessage = "<div style=\"font:inherit;white-space:pre-wrap;white-space:-moz-pre-wrap;word-wrap:break-word;width:99%\" dir=\"ltr\">" + currentForm.getDescription()
+    + "</div><br> I've invited you to fill out the form <b><span dir=\"ltr\">" + currentForm.getTitle() + "</span></b>. To fill it out, visit: <br>"
+    + currentForm.getPublishedUrl();
+  for (var i = 1; i < recipientsValues.length; i++) {
+    if (recipientsValues[i][0]) {
+      if (email) {
+        email = email + "," + recipientsValues[i][0];
+      } else {
+        email = recipientsValues[i][0];
+      }
+      if (i % 50 == 0) {
+        Logger.log(email);
+        MailApp.sendEmail(email, subject, message, {
+          htmlBody: htmlMessage
+        });
+        email = "";
+      }
+    }
+  }
+  if (email) {
+    Logger.log(email);
+    MailApp.sendEmail(email, subject, message, {
+      htmlBody: htmlMessage
+    });
+  }
+}
+
+function createTimeDrivenTrigger() {
+  // Schedules for the first of every month
+  ScriptApp.newTrigger("sendForm")
+   .timeBased()
+   .onMonthDay(1)
+   .create();
+}
+
+-----
+function onFormSubmit(e) {
+  var spreadSheet = SpreadsheetApp.openById('1CLUkLM228B65Mz2N7Zkz94Zek7JiABDkJ9qShYnc-50');
+  var sheet = spreadSheet.getSheetByName('Health Check');
+  var dataRange = sheet.getDataRange();
+  var values = dataRange.getValues();
+  translateToNumericalValues(values);
+  dataRange.setValues(values);
+}
+
+function translateToNumericalValues(values) {
+  for (var i = 0; i < values.length; i++) {
+    for (var j = 0; j < values[i].length; j++) {
+      switch (values[i][j]) {
+        case 'Strongly agree':
+        case 'Always':
+          values[i][j] = '5';
+          break;
+        case 'Agree':
+        case 'Usually':
+          values[i][j] = '4';
+          break;
+        case 'Neutral':
+        case 'Sometimes':
+          values[i][j] = '3';
+          break;
+        case 'Disagree':
+        case 'Rarely':
+          values[i][j] = '2';
+          break;
+        case 'Strongly disagree':
+        case 'Never':
+          values[i][j] = '1';
+          break;
+      }
+    }
+  }
+}
