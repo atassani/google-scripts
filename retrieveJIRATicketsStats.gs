@@ -21,9 +21,8 @@ function retrieveDataFromEazyBi(url) {
   return data;
 }
 
-function convertDataToArray(data) {
+function convertDataToArray(data, numItems) {
   var dataValues = [];
-  var numItems = data.query_results.row_positions.length;
   for (var i=0; i<numItems; i++) {
     dataValues[i] = [];
     dataValues[i][0] = data.query_results.row_positions[i][0].caption;
@@ -44,7 +43,8 @@ function retrieveJIRATicketsStats() {
   var reportId = 3105;
   var format = 'json';
   var data = retrieveDataFromEazyBi(eazybiBaseURL + "/accounts/" + accountId + "/export/report/" + reportId + "." + format);
-  var dataValues = convertDataToArray(data);
+  var numItems = data.query_results.row_positions.length;
+  var dataValues = convertDataToArray(data, numItems);
   var sheet = SpreadsheetApp.getActive().getSheetByName('Experiment');
   sheet.getRange('A2:G' + (numItems+1)).setValues(dataValues);
 }
